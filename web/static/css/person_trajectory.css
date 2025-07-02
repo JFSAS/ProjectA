@@ -149,7 +149,7 @@
 .person-thumb {
     width: 100%;
     /* 修改高度比例，使其更适合人物全身照片显示 */
-    height: 160px; /* 增加高度以更好地展示人物全身 */
+    height: 60%; /* 增加高度以更好地展示人物全身 */
     overflow: hidden;
     position: relative;
     /* 添加边框以更好地区分图片区域 */
@@ -166,7 +166,15 @@
 }
 
 .person-meta {
-    padding: 10px;
+    flex: 0 0 20%;
+    height: 20%;
+    width: 100%;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 12px; /* 新增：向下移动一点 */
 }
 
 .person-meta .person-id {
@@ -653,4 +661,25 @@
         margin-bottom: 10px;
         width: 100%;
     }
+}
+
+/* 位置分布图图片样式 */
+#location-map {
+    position: relative;
+    height: 200px;
+    background-color: rgba(22, 33, 62, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#location-map img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
 }

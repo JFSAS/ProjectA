@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>态势感知 - 视频监控分析系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="static/css/common.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/situation_awareness.css">
+    <script src="static/js/echarts.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="static/images/logo.png" alt="Logo" class="logo">
+                </div>
+                <h1>视频监控分析系统</h1>
+            </div>
+            
+            <div class="sidebar-nav">
+                <a href="/situation_awareness" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>态势感知</span>
+                </a>
+                <a href="/dashboard" class="nav-item ">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>实时监控大屏</span>
+                </a>
+                <a href="/profile" class="nav-item">
+                    <i class="fas fa-user-circle"></i>
+                    <span>目标搜索</span>
+                </a>
+                <a href="/analysis" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>智能分析报告</span>
+                </a>
+                <a href="/person_trajectory" class="nav-item">
+                    <i class="fas fa-route"></i>
+                    <span>人物轨迹数据库</span>
+                </a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="avatar">
+                        <img src="static/images/avatar.png" alt="用户头像">
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">管理员</div>
+                        <div class="user-role">系统管理员</div>
+                    </div>
+                </div>
+                <button class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>退出登录</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="top-bar">
+                <h2 class="page-title">实时态势感知</h2>
+                
+                <div class="time-filter">
+                    <button class="filter-btn active" data-time="realtime">实时数据</button>
+                    <button class="filter-btn" data-time="today">今日数据</button>
+                    <button class="filter-btn" data-time="week">本周数据</button>
+                    <button class="filter-btn" data-time="month">本月数据</button>
+                    <button class="filter-btn" data-time="custom">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>自定义</span>
+                    </button>
+                </div>
+                
+                <div class="top-bar-actions">
+                    <button class="notification-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <button class="theme-toggle" title="切换主题">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-container">
+                <!-- 概览卡片 -->
+                <div class="stats-overview">
+                    <div class="stat-card pulse">
+                        <div class="stat-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">4<span class="stat-small">/6</span></div>
+                            <div class="stat-label">活跃摄像头</div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i> 2
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-group"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">17</div>
+                            <div class="stat-label">实时检测人数</div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i> 23%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tag"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">10</div>
+                            <div class="stat-label">实时检测人脸</div>
+                            <div class="stat-trend down">
+                                <i class="fas fa-arrow-down"></i> 5%
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">14h</div>
+                            <div class="stat-label">系统运行时间</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 数据可视化网格 -->
+                <div class="grid-container">
+                    <!-- 摄像头分布地图 -->
+<!-- 找到地图卡片区域（约第171行），修改如下 -->
+<div class="card map-card">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-map-marker-alt"></i>
+            摄像头分布地图
+        </h3>
+        <div class="card-actions">
+            <button class="action-btn map-fullscreen" title="全屏显示">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <div id="camera-map" class="chart-container map-container"></div>
+        
+        <div class="map-legend">
+            <div class="legend-item">
+                <span class="legend-color active"></span>
+                <span class="legend-label">活跃摄像头</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color inactive"></span>
+                <span class="legend-label">离线摄像头</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color people-count"></span>
+                <span class="legend-label">人流量</span>
+            </div>
+        </div>
+    </div>
+</div>
+                    
+                    <!-- 检测趋势图 -->
+                    <div class="card trend-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-line"></i>
+                                24小时检测趋势
+                            </h3>
+                            <div class="card-actions">
+                                <div class="segmented-control">
+                                    <button class="segment active" data-target="persons">人员</button>
+                                    <button class="segment" data-target="faces">人脸</button>
+                                    <button class="segment" data-target="both">综合</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div id="detection-trend" class="chart-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 摄像头性能矩阵 -->
+                    <div class="card performance-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-tachometer-alt"></i>
+                                摄像头性能矩阵
+                            </h3>
+                            <div class="card-actions">
+                                <select class="select-control" id="performance-camera" title="选择摄像头">
+                                    <option value="all">所有摄像头</option>
+                                    <option value="group1">一号楼摄像头组</option>
+                                    <option value="group2">二号楼摄像头组</option>
+                                    <option value="group3">户外摄像头组</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div id="camera-performance" class="chart-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 人员活动热点 -->
+                    <div class="card heatmap-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-fire"></i>
+                                人员活动热点
+                            </h3>
+                            <div class="card-actions">
+                                <div class="time-selector">
+                                    <button class="time-btn active" data-time="morning">早高峰</button>
+                                    <button class="time-btn" data-time="noon">午间</button>
+                                    <button class="time-btn" data-time="evening">晚高峰</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div id="activity-heatmap" class="chart-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 跨摄像头轨迹分析 -->
+                    <div class="card trajectory-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-route"></i>
+                                跨摄像头轨迹分析
+                            </h3>
+                            <div class="card-actions">
+                                <button class="action-btn" title="查看详情">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div id="trajectory-sankey" class="chart-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 实时预警信息 -->
+                    <div class="card alerts-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-bell"></i>
+                                实时预警信息
+                            </h3>
+                            <div class="card-actions">
+                                <button class="action-btn filter-btn" title="筛选预警">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="alerts-list">
+                                <div class="alert-item high">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>人员聚集预警</h4>
+                                        <p>东区商场入口检测到异常聚集（>20人）</p>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <div class="alert-time">10:23:45</div>
+                                        <div class="alert-severity high">高</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="action-btn" title="查看详情">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-btn" title="标记已处理">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-item medium">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-video-slash"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>摄像头异常</h4>
+                                        <p>西区停车场C3摄像头信号不稳定</p>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <div class="alert-time">09:45:12</div>
+                                        <div class="alert-severity medium">中</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="action-btn" title="查看详情">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-btn" title="标记已处理">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert-item low">
+                                    <div class="alert-icon">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                    </div>
+                                    <div class="alert-content">
+                                        <h4>检测性能下降</h4>
+                                        <p>北区入口检测置信度低于阈值(0.65)</p>
+                                    </div>
+                                    <div class="alert-meta">
+                                        <div class="alert-time">08:12:33</div>
+                                        <div class="alert-severity low">低</div>
+                                    </div>
+                                    <div class="alert-actions">
+                                        <button class="action-btn" title="查看详情">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="action-btn" title="标记已处理">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 时空关联分析 -->
+                    <div class="card spatiotemporal-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-clock"></i>
+                                时空关联分析
+                            </h3>
+                            <div class="card-actions">
+                                <select class="select-control" id="spatiotemporal-view" title="选择视图">
+                                    <option value="hour">小时视图</option>
+                                    <option value="day">天视图</option>
+                                    <option value="week">周视图</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div id="spatiotemporal-chart" class="chart-container"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 人员特征统计 -->
+                    <div class="card features-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-user-tag"></i>
+                                人员特征统计
+                            </h3>
+                            <div class="card-actions">
+                                <button class="action-btn refresh-btn" title="刷新数据">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="features-grid">
+                                <div id="feature-chart-2" class="feature-chart"></div>
+                                <div id="feature-chart-3" class="feature-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 系统状态监控 -->
+                    <div class="card system-card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-server"></i>
+                                系统状态监控
+                            </h3>
+                            <div class="card-actions">
+                                <div class="status-indicator online">
+                                    <span class="status-dot"></span>
+                                    <span>系统正常</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="system-grid">
+                                <div class="system-item">
+                                    <h4>CPU使用率</h4>
+                                    <div id="cpu-gauge" class="gauge-chart"></div>
+                                </div>
+                                <div class="system-item">
+                                    <h4>内存使用率</h4>
+                                    <div id="memory-gauge" class="gauge-chart"></div>
+                                </div>
+                                <div class="system-item">
+                                    <h4>GPU使用率</h4>
+                                    <div id="gpu-gauge" class="gauge-chart"></div>
+                                </div>
+                                <div class="system-item">
+                                    <h4>存储使用率</h4>
+                                    <div id="storage-gauge" class="gauge-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知提示框 -->
+    <div class="notification success">
+        <div class="notification-content">
+            <i class="fas fa-check-circle"></i>
+            <span>操作成功！</span>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="static/js/common.js"></script>
+    <script src="static/js/situation_awareness.js"></script>
+</body>
+</html>

@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 cameras_bp = Blueprint('cameras', __name__)
 
 
-host_ip = '182.92.187.31'
+host_ip = '8.152.100.216'
 
 # 定义多个可能的API端点，按优先级排序
 API_ENDPOINTS = [

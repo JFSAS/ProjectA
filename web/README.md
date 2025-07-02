@@ -144,109 +144,20 @@ AI 处理密度会影响整体延迟和 CPU/GPU 使用率
    > 将原始流推到live/camera<n>中
    > 将处理后的流推到processec/camera<n>中
 
-**向量服务器还是放在分析服务器**
+**向量服务器放在分析服务器**
 
-## 进度
+#  运行
 
-### 阶段一 图像检测 （🕐）
-
-#### 1. 后端
-5000端口
-
-```python
-    #请求/stat.json可获得
-    #return live url  processed url
-    get_camera_list(data)  ["GET"]
-    analyzer_newdata() ["POST"]
+安装依赖包： 
+```shell
+pip install -r requirement.txt
+```
+启动服务
+```shell
+flask run
 ```
 
 
-#### 2. 分析服务器
-
-9000端口
-
-一直运行的基本功能：拉流，画框，推流
-当检测到新的数据后向后端发送 [id，time]
-同时将id图片存储到文件夹内
-
-#### 3. ai服务器
-
-```python
-    #请求ai服务器 code: 使用的算法编码 1：人脸 2：人体 4：人脸人体 
-    # return {"face": [{id, x1,y1,x2,y2, embedding}, ...] ,"body":[id, x1, x2, y1, y2], ...,embedding}
-    algorithm_detect_frame(code, frame) ["POST"]
-    #
-
-```
-
-
-### 阶段二 人脸识别（历史人脸查询与实时人脸检测）
-
-#### 1. 前端 
-
-人脸库管理页面
-   人脸库显示目前的
-
-
-#### 2. 后端api
-
-```python
-    analyzer_face_detect(id, time)
-    face_search_by_id(id)
-    face_search_by_image(id)
-
-```
-
-
-#### 2. 分析服务器
-
-```python
-    # return image
-    face_image(id)
-    # return all image
-    # {[id,image],[id,image]}
-    face_image_all()
-    # 在处理视频帧时将检测的id人员高亮处理
-    face_detect_by_id(id)
-    face_detect_by_image(image)
-    # 返回
-    face_search_by_image()
-```
-
-
-#### 3. ai服务器
 
 
 
-### 阶段三 预警大模型
-
-
-```mermaid
-
-graph LR
-    A[多品牌IP摄像头] --> B(流媒体服务器);
-    B --> C[Web管理平台 (Flask框架)];
-    C --> D[云数据库];
-    E[GPU服务器 (算法服务)] -- API调用 --> C;
-    E --> D;
-    C -- 设备配置, 任务调度, 数据可视化 --> F[用户界面];
-    B -- 实时视频流 --> G[前端应用];
-    G -- 用户交互 --> C;
-    D -- 历史数据检索 --> C;
-    
-    style B fill:#lightblue,stroke:#333,stroke-width:2px;
-    style C fill:#lightblue,stroke:#333,stroke-width:2px;
-    style D fill:#lightblue,stroke:#333,stroke-width:2px;
-    style E fill:#lightblue,stroke:#333,stroke-width:2px;
-    style F fill:#lightblue,stroke:#333,stroke-width:2px;
-    style G fill:#lightblue,stroke:#333,stroke-width:2px;
-    
-    subgraph "分层架构设计"
-        B;
-        C;
-        D;
-        E;
-        F;
-        G;
-    end
-```

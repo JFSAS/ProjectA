@@ -8,7 +8,8 @@ from pathlib import Path
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
+sys.path.append(str(project_root.parent))    # ← 改这里：parent.parent → parent.parent.parent
+
 
 # 导入Flask应用和数据库模型
 from web.app import create_app

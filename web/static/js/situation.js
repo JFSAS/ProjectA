@@ -1,19 +1,10 @@
 // City Situation Awareness Page JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize with empty array, will be populated from API
-    let alertsData = [];
-    
-    // Fetch alerts from API
-    fetchAlerts();
     
     // Fetch user cameras from API
     fetchUserCameras();
     
-    // Periodically check for new alerts
-    setInterval(() => {
-        generateNewAlert();
-    }, 30000); // Every 30 seconds
 
     // Add hotspot click events
     setupHotspotEvents();
@@ -54,347 +45,6 @@ function fetchUserCameras() {
         });
 }
 
-// Generate a new alert using the API
-function generateNewAlert() {
-    fetch('/api/alerts/generate')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(newAlert => {
-            // Fetch all alerts again to ensure we have the latest data
-            fetchAlerts();
-            showNotification(`新预警: ${newAlert.title}`, 'warning');
-        })
-        .catch(error => {
-            console.error('Error generating new alert:', error);
-        });
-}
-
-// Render alerts in the alerts container
-function renderAlerts(alerts) {
-    const alertsContainer = document.querySelector('.alerts-container');
-    if (!alertsContainer) return;
-
-    alertsContainer.innerHTML = '';
-    
-    alerts.forEach(alert => {
-        const alertElement = document.createElement('div');
-        alertElement.className = 'alert-item';
-        alertElement.innerHTML = `
-            <div class="alert-header">
-                <div class="alert-title">
-                    <span class="status status-${alert.severity}"></span>
-                    ${alert.title}
-                </div>
-                <div class="alert-time">${formatTime(alert.time)}</div>
-            </div>
-            <div class="alert-content">${alert.content}</div>
-            <div class="alert-footer">
-                <div class="alert-location">
-                    <i class="fas fa-map-marker-alt"></i> ${alert.location}
-                </div>
-                <div class="alert-severity ${alert.severity}">
-                    ${getSeverityText(alert.severity)}
-                </div>
-            </div>
-        `;
-        
-        alertsContainer.appendChild(alertElement);
-    });
-}
-
-// Get severity text based on severity level
-function getSeverityText(severity) {
-    switch(severity) {
-        case 'high':
-            return '高风险';
-        case 'medium':
-            return '中风险';
-        case 'low':
-            return '低风险';
-        default:
-            return '未知';
-    }
-}
-
-// Setup hotspot click events
-function setupHotspotEvents() {
-    const hotspots = document.querySelectorAll('.hotspot');
-    
-    hotspots.forEach(hotspot => {
-        hotspot.addEventListener('click', function() {
-            const location = this.getAttribute('data-location');
-            const density = this.getAttribute('data-density');
-            const count = this.getAttribute('data-count');
-            const status = this.getAttribute('data-status');
-            
-            showNotification(`正在查看 ${location} 的详细信息`, 'info');
-            
-            // Highlight the selected hotspot
-            hotspots.forEach(h => h.classList.remove('selected'));
-            this.classList.add('selected');
-            
-            // Simulate loading data
-            setTimeout(() => {
-                // Here you would typically load detailed data for the location
-                showNotification(`${location} 数据加载完成`, 'success');
-                
-                // Update the main video to show the selected location
-                const cameraFeeds = document.querySelectorAll('.camera-feed');
-                cameraFeeds.forEach(feed => {
-                    const feedLocation = feed.querySelector('.camera-location');
-                    if (feedLocation && feedLocation.textContent.includes(location)) {
-                        feed.click();
-                    }
-                });
-            }, 1000);
-        });
-    });
-    
-    // Setup heatmap controls
-    setupHeatmapControls();
-}
-
-// Setup heatmap controls
-function setupHeatmapControls() {
-    const heatmap = document.querySelector('.heatmap');
-    const mapBackground = document.querySelector('.map-background');
-    const zoomInBtn = document.getElementById('zoom-in');
-    const zoomOutBtn = document.getElementById('zoom-out');
-    const resetViewBtn = document.getElementById('reset-view');
-    const refreshHeatmapBtn = document.getElementById('refresh-heatmap');
-    const fullscreenHeatmapBtn = document.getElementById('fullscreen-heatmap');
-    
-    if (!heatmap || !mapBackground) return;
-    
-    let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-    let isDragging = false;
-    let startX, startY;
-    
-    // Zoom in button
-    if (zoomInBtn) {
-        zoomInBtn.addEventListener('click', function() {
-            if (scale < 2) {
-                scale += 0.2;
-                updateMapTransform();
-            }
-        });
-    }
-    
-    // Zoom out button
-    if (zoomOutBtn) {
-        zoomOutBtn.addEventListener('click', function() {
-            if (scale > 0.6) {
-                scale -= 0.2;
-                updateMapTransform();
-            }
-        });
-    }
-    
-    // Reset view button
-    if (resetViewBtn) {
-        resetViewBtn.addEventListener('click', function() {
-            scale = 1;
-            translateX = 0;
-            translateY = 0;
-            updateMapTransform();
-        });
-    }
-    
-    // Refresh heatmap button
-    if (refreshHeatmapBtn) {
-        refreshHeatmapBtn.addEventListener('click', function() {
-            const button = this;
-            button.querySelector('i').classList.add('fa-spin');
-            
-            // Simulate refreshing data
-            setTimeout(() => {
-                button.querySelector('i').classList.remove('fa-spin');
-                updateHeatmapData();
-                showNotification('热力图数据已更新', 'success');
-            }, 1500);
-        });
-    }
-    
-    // Fullscreen button
-    if (fullscreenHeatmapBtn) {
-        fullscreenHeatmapBtn.addEventListener('click', function() {
-            toggleFullscreen(heatmap);
-        });
-    }
-    
-    // Mouse wheel zoom
-    heatmap.addEventListener('wheel', function(e) {
-        e.preventDefault();
-        
-        if (e.deltaY < 0) {
-            // Zoom in
-            if (scale < 2) scale += 0.1;
-        } else {
-            // Zoom out
-            if (scale > 0.6) scale -= 0.1;
-        }
-        
-        updateMapTransform();
-    });
-    
-    // Pan functionality
-    heatmap.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        startX = e.clientX - translateX;
-        startY = e.clientY - translateY;
-        heatmap.style.cursor = 'grabbing';
-    });
-    
-    document.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        
-        translateX = e.clientX - startX;
-        translateY = e.clientY - startY;
-        
-        // Limit panning
-        const maxTranslate = 200 * scale;
-        translateX = Math.max(-maxTranslate, Math.min(translateX, maxTranslate));
-        translateY = Math.max(-maxTranslate, Math.min(translateY, maxTranslate));
-        
-        updateMapTransform();
-    });
-    
-    document.addEventListener('mouseup', function() {
-        isDragging = false;
-        heatmap.style.cursor = 'grab';
-    });
-    
-    // Double click to zoom in
-    heatmap.addEventListener('dblclick', function(e) {
-        if (scale < 2) {
-            scale += 0.3;
-            updateMapTransform();
-        }
-    });
-    
-    // Update map transform
-    function updateMapTransform() {
-        mapBackground.style.transform = `scale(${scale}) translate(${translateX / scale}px, ${translateY / scale}px)`;
-    }
-    
-    // Initialize cursor
-    heatmap.style.cursor = 'grab';
-    
-    // Setup time-based data visualization
-    setupTimeBasedVisualization();
-}
-
-// Update heatmap data (simulated)
-function updateHeatmapData() {
-    const hotspots = document.querySelectorAll('.hotspot');
-    
-    hotspots.forEach(hotspot => {
-        // Generate random data
-        const density = ['低', '中', '高'][Math.floor(Math.random() * 3)];
-        const count = Math.floor(Math.random() * 200) + 50;
-        const isVehicle = hotspot.getAttribute('data-location').includes('停车场');
-        const countText = isVehicle ? `${count}辆` : `${count}人`;
-        
-        // Update data attributes
-        hotspot.setAttribute('data-density', density);
-        hotspot.setAttribute('data-count', countText);
-        
-        // Update info display
-        const infoElement = hotspot.querySelector('.hotspot-info');
-        if (infoElement) {
-            const densityType = isVehicle ? '车辆密度' : '人流密度';
-            const countType = isVehicle ? '当前车辆' : '当前人数';
-            
-            infoElement.innerHTML = `
-                <h4>${hotspot.getAttribute('data-location')}</h4>
-                <p>${densityType}: ${density}</p>
-                <p>${countType}: ${countText}</p>
-                <p>状态: ${getStatusFromDensity(density, isVehicle)}</p>
-            `;
-        }
-        
-        // Update visual appearance based on density
-        hotspot.style.animation = density === '高' ? 'pulse 1s infinite' : 'pulse 3s infinite';
-        
-        if (density === '高') {
-            hotspot.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
-            hotspot.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.8)';
-        } else if (density === '中') {
-            hotspot.style.backgroundColor = 'rgba(255, 165, 0, 0.7)';
-            hotspot.style.boxShadow = '0 0 12px rgba(255, 165, 0, 0.7)';
-        } else {
-            hotspot.style.backgroundColor = 'rgba(255, 255, 0, 0.6)';
-            hotspot.style.boxShadow = '0 0 10px rgba(255, 255, 0, 0.6)';
-        }
-    });
-    
-    // Update heatmap overlay
-    updateHeatmapOverlay();
-}
-
-// Get status text based on density
-function getStatusFromDensity(density, isVehicle) {
-    if (isVehicle) {
-        switch(density) {
-            case '高': return '车辆密集';
-            case '中': return '车流正常';
-            case '低': return '车辆稀少';
-            default: return '正常';
-        }
-    } else {
-        switch(density) {
-            case '高': return '人流密集';
-            case '中': return '人流正常';
-            case '低': return '人流稀少';
-            default: return '正常';
-        }
-    }
-}
-
-// Update heatmap overlay based on hotspot data
-function updateHeatmapOverlay() {
-    const heatmapOverlay = document.querySelector('.heatmap-overlay');
-    if (!heatmapOverlay) return;
-    
-    // Create dynamic gradient based on hotspot positions
-    const hotspots = document.querySelectorAll('.hotspot');
-    let gradients = '';
-    
-    hotspots.forEach((hotspot, index) => {
-        const rect = hotspot.getBoundingClientRect();
-        const heatmapRect = document.querySelector('.heatmap').getBoundingClientRect();
-        
-        const x = ((rect.left + rect.width/2) - heatmapRect.left) / heatmapRect.width * 100;
-        const y = ((rect.top + rect.height/2) - heatmapRect.top) / heatmapRect.height * 100;
-        
-        const density = hotspot.getAttribute('data-density');
-        let color, size;
-        
-        switch(density) {
-            case '高':
-                color = 'rgba(255, 0, 0, 0.4)';
-                size = '70%';
-                break;
-            case '中':
-                color = 'rgba(255, 165, 0, 0.3)';
-                size = '50%';
-                break;
-            default:
-                color = 'rgba(255, 255, 0, 0.2)';
-                size = '30%';
-        }
-        
-        gradients += `radial-gradient(circle at ${x}% ${y}%, ${color} 0%, rgba(255, 165, 0, 0.2) ${size}, transparent 100%)${index < hotspots.length - 1 ? ',' : ''}`;
-    });
-    
-    heatmapOverlay.style.background = gradients;
-}
 
 // Setup time-based visualization
 function setupTimeBasedVisualization() {
@@ -448,34 +98,6 @@ function toggleFullscreen(element) {
     }
 }
 
-// 显示通知函数
-function showNotification(message, type = 'info') {
-    // 创建通知元素
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `
-        <div class="notification-content">
-            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
-            <span>${message}</span>
-        </div>
-    `;
-    
-    // 添加到页面
-    document.body.appendChild(notification);
-    
-    // 显示通知
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
-    
-    // 自动关闭
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
-}
 
 // Setup  video list interactions
 function setupVideoMainInteractions() {
@@ -580,7 +202,7 @@ function renderCameraList(cameras) {
         <div class="main-video-preview">
             <video class="mainVideo" muted autoplay width="1024" height="576">Your browser is too old which doesn't support HTML5 video.</video>
             <div class="main-video-status">
-                <span class="status status-success"></span> 在线
+               在线
             </div>
         </div>
         <div class="main-video-overlay">
@@ -643,17 +265,17 @@ function renderCameraList(cameras) {
         const cameraElement = document.createElement('div');
         cameraElement.className = 'camera-feed';
         cameraElement.setAttribute('data-id', camera.id);
-        cameraElement.setAttribute('data-title', camera.camera_name);
+        cameraElement.setAttribute('data-title', camera.location);
         cameraElement.setAttribute('data-description', camera.description || '');
-        cameraElement.setAttribute('data-people', '0');
+        cameraElement.setAttribute('data-people', '4');
         cameraElement.setAttribute('data-alerts', '0');
         cameraElement.setAttribute('data-time', new Date().toLocaleTimeString());
         
         cameraElement.innerHTML = `
             <div class="camera-preview">
                 <video class="videoElement" autoplay muted></video>
-                <div class="camera-status ${camera.is_active ? 'status-online' : 'status-offline'}">
-                    ${camera.is_active ? '在线' : '离线'}
+                <div class="camera-status status-online">
+                    在线
                 </div>
                 <div class="camera-favorite ${camera.is_favorite ? 'active' : ''}" data-id="${camera.id}">
                     <i class="fas fa-star"></i>

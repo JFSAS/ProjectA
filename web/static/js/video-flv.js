@@ -63,9 +63,9 @@ function playFlvVideo(videoUrl, vElement, options = {}) {
       const diff = end - vElement.currentTime;
 
       if (5 <= diff && diff <= 10) {
-        vElement.playbackRate = 2;
+        vElement.playbackRate = 1.5; // 适当加速
       } else if (diff > 15) {
-        vElement.currentTime = end;
+        vElement.playbackRate = 1.5;
       } else {
         vElement.playbackRate = 1;
       }

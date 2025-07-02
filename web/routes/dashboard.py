@@ -31,6 +31,13 @@ def monitor_detail():
     """监控详情页面（受保护的页面）"""
     return render_template('monitor-detail.html')
 
+@dashboard_bp.route('/situation_awareness')
+@login_required
+def situation_awareness():
+    """监控详情页面（受保护的页面）"""
+    return render_template('situation_awareness.html')
+
+
 @dashboard_bp.route('/profile')
 @login_required
 def profile():

@@ -440,9 +440,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 更新位置分布图
     function updateLocationMap(appearances) {
-        // TODO: 实现位置分布图
         const locationMap = document.getElementById('location-map');
-        locationMap.innerHTML = '<div class="placeholder">位置分布图（功能尚未实现）</div>';
+        locationMap.innerHTML = '<img src="/static/images/map.png" alt="位置分布图">';
     }
     
     // 更新摄像头选择下拉框
@@ -492,8 +491,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     renderTimeDistributionChart(data.time_distribution);
                     
                     // TODO: 渲染摄像头分布图表
-                    document.getElementById('camera-distribution-chart').innerHTML = 
-                        '<div class="placeholder">摄像头分布图表（功能尚未实现）</div>';
+// 渲染摄像头分布图表（先添加图片占位）
+document.getElementById('camera-distribution-chart').innerHTML =
+    '<img src="/static/images/map.png" alt="摄像头分布图表占位" style="max-width:100%;max-height:180px;display:block;margin:auto;">';
                 } else {
                     document.getElementById('time-distribution-chart').innerHTML = 
                         `<div class="error">加载统计数据失败: ${data.message || '未知错误'}</div>`;

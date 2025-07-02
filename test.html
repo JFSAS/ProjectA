@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>无滚动布局草图 - 城市态势感知系统</title>
+    <style>
+        :root {
+            --card-bg: #1a2c4e;
+            --dark-bg: #0f1c33;
+            --text-light: #ffffff;
+            --text-secondary: #a0aec0;
+            --primary-color: #4a90e2;
+            --danger-color: #e53e3e;
+            --success-color: #48bb78;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+        
+        /* 折叠侧边栏 */
+        .sidebar {
+            width: 60px;
+            background: var(--card-bg);
+            height: 100vh;
+            overflow: hidden;
+            transition: width 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            border-radius: 50%;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            justify-content: center;
+            color: var(--text-secondary);
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item.active {
+            background: rgba(74, 144, 226, 0.1);
+            border-left: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* 顶部状态卡片 */
+        .overview-section {
+            display: flex;
+            padding: 10px;
+            gap: 10px;
+            height: 80px;
+        }
+        
+        .status-card {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+        }
+        
+        .card-text {
+            flex: 1;
+        }
+        
+        .card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .card-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        /* 监控区域 */
+        .monitoring-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0 10px 10px;
+            overflow: hidden;
+        }
+        
+        .area-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        
+        .area-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 主视频区 */
+        .main-video {
+            height: 38vh;
+            background: #000;
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .video-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .location-tag {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .online-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border-radius: 20px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .online-status::before {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #48bb78;
+            margin-right: 8px;
+        }
+        
+        /* 视频列表网格 */
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 10px;
+            flex: 1;
+            overflow-y: auto;
+            height: 18vh;
+        }
+        
+        .camera-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            height: 120px;
+        }
+        
+        .camera-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.6);
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .camera-online {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #48bb78;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 折叠侧边栏 -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"></div>
+            </div>
+            <div class="nav-item active">
+                <i>📊</i>
+            </div>
+            <div class="nav-item">
+                <i>👥</i>
+            </div>
+            <div class="nav-item">
+                <i>🎥</i>
+            </div>
+            <div class="nav-item">
+                <i>🔍</i>
+            </div>
+            <div class="nav-item">
+                <i>📈</i>
+            </div>
+            <div class="nav-item">
+                <i>📁</i>
+            </div>
+        </nav>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 顶部状态卡片 -->
+            <section class="overview-section">
+                <div class="status-card">
+                    <div class="card-icon">📺</div>
+                    <div class="card-text">
+                        <div class="card-value">4</div>
+                        <div class="card-label">在线监控点</div>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="card-icon">👥</div>
+                    <div class="card-text">
+                        <div class="card-value">17</div>
+                        <div class="card-label">检测人数</div>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="card-icon">⚠️</div>
+                    <div class="card-text">
+                        <div class="card-value">14</div>
+                        <div class="card-label">检测人脸</div>
+                    </div>
+                </div>
+                
+                <div class="status-card">
+                    <div class="card-icon">⏱️</div>
+                    <div class="card-text">
+                        <div class="card-value">2.5s</div>
+                        <div class="card-label">平均响应时间</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 监控区域 -->
+            <div class="monitoring-area">
+                <div class="area-header">
+                    <div class="area-title">
+                        <i>📹</i> 重点区域监控
+                    </div>
+                    <div class="area-actions">
+                        <button style="background:transparent;border:none;color:white">⚙️</button>
+                        <button style="background:transparent;border:none;color:white">📊</button>
+                    </div>
+                </div>
+                
+                <!-- 主视频区 -->
+                <div class="main-video">
+                    <div class="location-tag">
+                        <i>📍</i> 北出口
+                    </div>
+                    <div class="online-status">
+                        在线
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <div style="font-weight:bold;margin-bottom:5px">北出口</div>
+                            <div style="font-size:0.85rem;color:#a0aec0">分辨率: 1920x1080 帧率: 29</div>
+                        </div>
+                        <div>
+                            <button style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:5px;padding:5px 10px;margin-left:5px">⬅️ 查看详情</button>
+                            <button style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:5px;padding:5px 10px;margin-left:5px">↗️ 全屏</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 监控点列表 -->
+                <div class="area-header" style="margin-top:-5px">
+                    <div style="font-size:0.9rem;font-weight:bold">监控点列表</div>
+                </div>
+                
+                <!-- 视频列表网格 -->
+                <div class="camera-grid">
+                    <div class="camera-item">
+                        <div class="camera-online"></div>
+                        <div class="camera-name">监控点-GL1</div>
+                    </div>
+                    <div class="camera-item">
+                        <div class="camera-online"></div>
+                        <div class="camera-name">监控点-GL2</div>
+                    </div>
+                    <div class="camera-item">
+                        <div class="camera-online"></div>
+                        <div class="camera-name">监控点-GL3</div>
+                    </div>
+                    <div class="camera-item">
+                        <div class="camera-online"></div>
+                        <div class="camera-name">监控点-GL4</div>
+                    </div>
+                    <!-- 可根据需要显示更多摄像头 -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
